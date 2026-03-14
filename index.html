@@ -5,45 +5,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BIBLIO.SYS — Galaxie Musicale</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- CRT scan line sweep -->
 <div class="scanline"></div>
-
-<!-- Custom cursor -->
-<div id="cursor"></div>
+<div id="cursor"><div id="cursor-inner"></div></div>
 
 <div id="ui">
-  <div id="top-bar">
-    <div id="logo">BIBLIO.SYS</div>
-    <div id="stats-bar">
-      <span id="stat-artists"></span>
-      <span class="sep">//</span>
-      <span id="stat-tracks"></span>
+
+  <!-- TOP BAR -->
+  <header id="top-bar">
+    <div id="top-left">
+      <div id="logo">BIBLIO<span class="logo-dot">.</span>SYS</div>
+      <div id="bios-tag">VER 2.0 // MUSIC EXPLORER</div>
     </div>
-    <div id="search-wrap">
-      <input type="text" id="search" placeholder="RECHERCHER UN ARTISTE_" autocomplete="off" spellcheck="false">
-      <div id="search-results"></div>
+    <div id="top-center">
+      <div id="search-wrap">
+        <span class="prompt">&gt;_</span>
+        <input type="text" id="search" placeholder="RECHERCHER UN ARTISTE" autocomplete="off" spellcheck="false">
+        <div id="search-results"></div>
+      </div>
+    </div>
+    <div id="top-right">
+      <div class="stat-block">
+        <div class="stat-val" id="stat-artists">—</div>
+        <div class="stat-lbl">ARTISTES</div>
+      </div>
+      <div class="stat-sep">//</div>
+      <div class="stat-block">
+        <div class="stat-val" id="stat-tracks">—</div>
+        <div class="stat-lbl">TITRES</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BACK BUTTON -->
+  <button id="back-btn" onclick="backToGalaxy()">
+    <span class="btn-bracket">[</span> ← GALAXIE <span class="btn-bracket">]</span>
+  </button>
+
+  <!-- ARTIST PANEL (bottom center) -->
+  <div id="artist-panel">
+    <div id="artist-panel-inner">
+      <div id="ap-genre"></div>
+      <div id="ap-name"></div>
+      <div id="ap-meta"></div>
     </div>
   </div>
 
-  <button id="back-btn" onclick="backToGalaxy()">GALAXIE</button>
+  <!-- HINT -->
+  <div id="hint">DRAG · ZOOM · CLICK</div>
 
-  <div id="artist-info">
-    <div id="artist-name"></div>
-    <div id="artist-meta"></div>
-  </div>
+  <!-- CORNER DECORATIONS -->
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
 
-  <div id="hint">DRAG POUR PIVOTER &nbsp;·&nbsp; SCROLL POUR ZOOMER &nbsp;·&nbsp; CLIQUER UNE PLANÈTE</div>
 </div>
 
+<!-- TOOLTIP -->
 <div id="tooltip">
-  <div id="tt-color-bar"></div>
-  <canvas id="tt-osc" width="260" height="80"></canvas>
-  <div id="tt-body">
+  <div id="tt-header">
+    <div id="tt-sig"></div>
+    <div id="tt-status">SIGNAL</div>
+  </div>
+  <canvas id="tt-osc" width="280" height="72"></canvas>
+  <div id="tt-footer">
     <div id="tt-artist"></div>
     <div id="tt-track"></div>
     <div id="tt-album"></div>

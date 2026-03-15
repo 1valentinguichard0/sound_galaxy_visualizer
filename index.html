@@ -1045,8 +1045,8 @@ body::before {
         </div>
         <div class="import-option" onclick="selectService('soundcloud')" id="opt-soundcloud">
           <div class="opt-service">SoundCloud</div>
-          <div class="opt-format">Via API — username + client_id</div>
-          <div class="opt-badge violet">API</div>
+          <div class="opt-format">Fichier .csv via Soundiiz</div>
+          <div class="opt-badge violet">TIERS</div>
         </div>
         <div class="import-option mine" onclick="selectService('mine')" id="opt-mine">
           <div class="opt-service">Utiliser ma bibliothèque ✦</div>
@@ -1085,31 +1085,13 @@ body::before {
       </div>
 
       <div class="import-instructions" id="instr-soundcloud">
-        <div class="instr-title">// Connecter SoundCloud</div>
+        <div class="instr-title">// Comment exporter depuis SoundCloud</div>
         <div class="instr-steps">
-          1. Va sur <span>soundcloud.com/you/apps</span> → créer une app<br>
-          2. Copie ton <span>Client ID</span> (ou extrais-le : F12 → Network → cherche <span>client_id=</span>)<br>
-          3. Entre ton <span>username SoundCloud</span> et ton <span>Client ID</span> ci-dessous<br>
-          4. Clique <span>Charger mes likes</span>
+          1. Va sur <span>soundiiz.com</span> et connecte ton compte SoundCloud<br>
+          2. Dans le menu gauche, clique sur <span>SoundCloud → Liked Tracks</span><br>
+          3. Clique <span>Export</span> → choisis le format <span>CSV</span><br>
+          4. Glisse-dépose le fichier <span>.csv</span> ci-dessous
         </div>
-      </div>
-
-      <div id="sc-form" style="display:none;margin-bottom:16px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-          <div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.14em;color:rgba(232,224,255,0.4);margin-bottom:4px;text-transform:uppercase;">Username</div>
-            <input id="sc-username" type="text" placeholder="ex: nielscc" autocomplete="off" spellcheck="false"
-              style="width:100%;background:rgba(232,224,255,0.04);border:1px solid rgba(123,47,255,0.4);padding:9px 12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#E8E0FF;outline:none;letter-spacing:0.06em;box-sizing:border-box;">
-          </div>
-          <div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.14em;color:rgba(232,224,255,0.4);margin-bottom:4px;text-transform:uppercase;">Client ID</div>
-            <input id="sc-clientid" type="text" placeholder="xxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false"
-              style="width:100%;background:rgba(232,224,255,0.04);border:1px solid rgba(123,47,255,0.4);padding:9px 12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#E8E0FF;outline:none;letter-spacing:0.06em;box-sizing:border-box;">
-          </div>
-        </div>
-        <button onclick="loadSoundCloud()" style="width:100%;padding:10px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;background:rgba(123,47,255,0.2);border:1px solid rgba(123,47,255,0.6);color:#E8E0FF;cursor:pointer;transition:background .15s;">
-          ↓ &nbsp; CHARGER MES LIKES
-        </button>
       </div>
 
       <div class="drop-zone" id="drop-zone">
@@ -1167,23 +1149,17 @@ function selectService(svc) {
   });
 
   const dz      = document.getElementById('drop-zone');
-  const scForm  = document.getElementById('sc-form');
   const browse  = document.getElementById('browse-btn');
 
   // Réinitialiser tout
   dz.classList.remove('show');
   browse.style.display = 'none';
-  scForm.style.display = 'none';
   parsedData = null;
   document.getElementById('dz-filename').textContent = '';
 
   if (svc === 'mine') {
     setStatus('// Bibliothèque data.js prête · 325 artistes · 8 326 titres', 'ok');
     setBtnReady(true);
-  } else if (svc === 'soundcloud') {
-    scForm.style.display = 'block';
-    setBtnReady(false);
-    setStatus('// Entre ton username et client_id');
   } else {
     dz.classList.add('show');
     browse.style.display = 'block';
@@ -1304,7 +1280,7 @@ function parseSpotifyOrDeezerCSV(text, svc) {
   const header = lines[0].split(sep).map(h => h.replace(/"/g,'').trim().toLowerCase());
 
   let colTrack, colArtist, colAlbum;
-  if (svc === 'spotify') {
+  if (svc === 'spotify') {  // spotify uniquement
     colTrack  = header.findIndex(h => h === 'track name');
     // Exportify: "artist name(s)" — chercher avec ou sans "(s)"
     colArtist = header.findIndex(h => h.startsWith('artist name'));
@@ -1312,8 +1288,8 @@ function parseSpotifyOrDeezerCSV(text, svc) {
     if (colArtist < 0) colArtist = header.findIndex(h => h.includes('artist'));
     colAlbum  = header.findIndex(h => h === 'album name');
     if (colAlbum < 0) colAlbum = header.findIndex(h => h.includes('album'));
-  } else { // deezer
-    colTrack  = header.findIndex(h => h === 'title' || h === 'track' || h === 'song title');
+  } else { // deezer + soundcloud (soundiiz)
+    colTrack  = header.findIndex(h => ['title','track','song title','name','track name'].includes(h));
     colArtist = header.findIndex(h => h === 'artist' || h.startsWith('artist'));
     colAlbum  = header.findIndex(h => h === 'album' || h.includes('album'));
   }
@@ -1351,86 +1327,6 @@ function splitCSV(line, sep = ',') {
   return result;
 }
 
-// ── SOUNDCLOUD API ──
-async function loadSoundCloud() {
-  const username = document.getElementById('sc-username').value.trim();
-  const clientId = document.getElementById('sc-clientid').value.trim();
-
-  if (!username || !clientId) {
-    setStatus('// Remplis le username et le client_id', 'err');
-    return;
-  }
-
-  setStatus('// Connexion à SoundCloud…');
-  setBtnReady(false);
-
-  try {
-    // 1. Résoudre le user_id depuis le username
-    const userUrl = `https://api.soundcloud.com/resolve?url=https://soundcloud.com/${encodeURIComponent(username)}&client_id=${clientId}`;
-    const userResp = await fetch(userUrl);
-    if (!userResp.ok) {
-      if (userResp.status === 401) throw new Error('Client ID invalide ou expiré');
-      if (userResp.status === 404) throw new Error('Username introuvable');
-      throw new Error('Erreur API: ' + userResp.status);
-    }
-    const user = await userResp.json();
-    const userId = user.id;
-    setStatus('// Utilisateur trouvé : ' + (user.full_name || username) + ' — chargement des likes…');
-
-    // 2. Charger les likes par pages (max 200 par requête)
-    let allTracks = [];
-    let nextHref  = `https://api.soundcloud.com/users/${userId}/likes?client_id=${clientId}&limit=200&linked_partitioning=1`;
-
-    let pages = 0;
-    while (nextHref && pages < 10) {  // max 2000 likes
-      const resp = await fetch(nextHref);
-      if (!resp.ok) break;
-      const data = await resp.json();
-
-      const tracks = (data.collection || []).filter(item => {
-        const t = item.track || item;
-        return t && t.title && t.user;
-      });
-      allTracks = allTracks.concat(tracks);
-      nextHref  = data.next_href ? data.next_href + `&client_id=${clientId}` : null;
-      pages++;
-      setStatus(`// Chargé ${allTracks.length} likes…`);
-    }
-
-    if (allTracks.length === 0) {
-      throw new Error('Aucun like trouvé pour cet utilisateur');
-    }
-
-    // 3. Construire la map artiste → tracks
-    parsedData = parseSoundCloudTracks(allTracks);
-    const total = parsedData.reduce((s,a) => s + a.trackCount, 0);
-    setStatus('// ✓ ' + parsedData.length + ' artistes · ' + total.toLocaleString('fr-FR') + ' titres', 'ok');
-    setBtnReady(true);
-
-  } catch(err) {
-    setStatus('// Erreur : ' + err.message, 'err');
-  }
-}
-
-function parseSoundCloudTracks(items) {
-  const artistMap = {};
-
-  items.forEach(item => {
-    const track  = item.track || item;
-    if (!track || !track.title || !track.user) return;
-
-    const artist = track.user.username || track.user.full_name || 'Unknown';
-    const title  = track.title;
-    const genre  = track.genre || 'Electronic';
-    const year   = track.created_at ? parseInt(track.created_at.slice(0,4)) : null;
-
-    if (!artistMap[artist]) artistMap[artist] = { tracks: [], albums: new Set(), genre };
-    artistMap[artist].tracks.push({ name: title, album: genre || 'SoundCloud', year });
-    artistMap[artist].albums.add(genre || 'SoundCloud');
-  });
-
-  return buildArtistArray(artistMap);
-}
 
 function buildArtistArray(artistMap) {
   const sorted = Object.entries(artistMap)

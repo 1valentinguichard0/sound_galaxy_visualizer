@@ -397,8 +397,8 @@ body::before {
 }
 .cell-b-big {
   font-family: var(--display);
-  font-size: clamp(56px, 6vw, 100px);
-  line-height: 1; color: rgba(6,4,15,0.7);
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 0.9; color: rgba(6,4,15,0.75);
   letter-spacing: -0.02em;
 }
 .cell-b-label {
@@ -486,6 +486,19 @@ body::before {
 .cell-f-label {
   font-family: var(--mono); font-size: 9px;
   letter-spacing: 0.2em; color: rgba(232,224,255,0.35); text-transform: uppercase;
+}
+.cell-f-services {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-top: 10px;
+}
+.cell-f-services span {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(232,224,255,0.5);
+}
+.cell-f-services span::before {
+  content: '// ';
+  color: rgba(0,207,255,0.4);
 }
 
 /* Cell G — CTA GALAXY */
@@ -603,6 +616,59 @@ body::before {
 .btn-white:hover { background: rgba(232,224,255,0.22); border-color: rgba(232,224,255,0.5); }
 
 /* ── ANIMATIONS ── */
+.nav-btn-outline {
+  padding: 5px 14px !important;
+  border: 1px solid rgba(123,47,255,0.5) !important;
+  color: rgba(232,224,255,0.7) !important;
+  transition: border-color .15s, background .15s !important;
+}
+.nav-btn-outline:hover {
+  border-color: var(--violet) !important;
+  background: rgba(123,47,255,0.1) !important;
+  color: var(--white) !important;
+}
+.nav-btn-fill {
+  padding: 5px 14px !important;
+  background: var(--violet);
+  color: var(--white) !important;
+  border: 1px solid var(--violet);
+  transition: background .15s !important;
+}
+.nav-btn-fill:hover { background: #9B4FFF !important; color: var(--white) !important; }
+
+/* ══ STATS BAR ══ */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(123,47,255,0.2);
+  border-bottom: 1px solid rgba(123,47,255,0.2);
+  background: rgba(123,47,255,0.03);
+}
+.stats-bar-item {
+  padding: 32px 56px;
+  border-right: 1px solid rgba(123,47,255,0.12);
+  display: flex; flex-direction: column; gap: 6px;
+  align-items: flex-start;
+}
+.stats-bar-item:last-child { border-right: none; }
+.sb-num {
+  font-family: var(--display);
+  font-size: clamp(44px, 5.5vw, 72px);
+  line-height: 1;
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+.sb-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(232,224,255,0.35);
+  text-transform: uppercase;
+}
+
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -838,6 +904,248 @@ body::before {
 .btn-launch.ready { opacity: 1; pointer-events: auto; }
 .btn-launch.ready:hover { opacity: 0.85; }
 
+
+/* ══ FEED PROFILS ══ */
+.profiles-section {
+  padding: 72px 48px;
+  border-top: 1px solid rgba(123,47,255,0.15);
+}
+.profiles-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 28px;
+}
+.profiles-eyebrow {
+  font-family: var(--mono);
+  font-size: 9px; letter-spacing: 0.22em;
+  color: var(--cyan); text-transform: uppercase; margin-bottom: 6px;
+}
+.profiles-title {
+  font-family: var(--display);
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 0.92; color: var(--white);
+  text-transform: uppercase;
+}
+.profiles-see-all {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--cyan); text-decoration: none;
+  border-bottom: 1px solid rgba(0,207,255,0.3);
+  padding-bottom: 2px;
+  transition: border-color .15s, color .15s;
+}
+.profiles-see-all:hover { color: var(--white); border-color: var(--white); }
+
+.profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  background: rgba(232,224,255,0.04);
+}
+
+.profile-card {
+  background: var(--black);
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 14px;
+  transition: background .15s;
+  cursor: pointer;
+}
+.profile-card:hover { background: rgba(123,47,255,0.06); }
+
+.pc-top {
+  display: flex; align-items: center; gap: 10px;
+}
+.pc-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px;
+  font-weight: bold; color: var(--white);
+  flex-shrink: 0;
+}
+.pc-info { flex: 1; min-width: 0; }
+.pc-name {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.1em; color: var(--white);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pc-handle {
+  font-family: var(--mono); font-size: 8px;
+  letter-spacing: 0.08em; color: rgba(232,224,255,0.3);
+  margin-top: 2px;
+}
+.pc-online {
+  font-family: var(--mono); font-size: 7px;
+  letter-spacing: 0.1em; color: #00ff9f;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+.pc-planets {
+  display: flex; align-items: center; gap: 6px;
+}
+.pc-planet {
+  display: block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+.pc-stats {
+  display: flex; gap: 16px;
+}
+.pc-stat {
+  display: flex; flex-direction: column; gap: 1px;
+}
+.pc-stat-v {
+  font-family: var(--mono); font-size: 13px;
+  letter-spacing: 0.04em; color: var(--white);
+}
+.pc-stat-l {
+  font-family: var(--mono); font-size: 7px;
+  letter-spacing: 0.14em; color: rgba(232,224,255,0.3);
+  text-transform: uppercase;
+}
+
+.pc-genres {
+  display: flex; gap: 5px; flex-wrap: wrap;
+}
+.pc-genre {
+  font-family: var(--mono); font-size: 7px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid rgba(232,224,255,0.1);
+  color: rgba(232,224,255,0.3);
+}
+
+@media (max-width: 900px) {
+  .profiles-grid { grid-template-columns: 1fr 1fr; }
+  .profiles-section { padding: 48px 24px; }
+  .stats-bar { grid-template-columns: 1fr 1fr; }
+  .stats-bar-item { padding: 20px 24px; }
+}
+
+/* ══ CTA FINAL ══ */
+.cta-final {
+  border-top: 1px solid rgba(123,47,255,0.2);
+  padding: 100px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-final-inner { position: relative; z-index: 1; }
+.cta-final-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(123,47,255,0.14) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.cta-final-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.22em;
+  color: var(--cyan); text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.cta-final-title {
+  font-family: var(--display);
+  font-size: clamp(56px, 8vw, 112px);
+  line-height: 0.88;
+  margin-bottom: 20px;
+}
+.cta-white  { display: block; color: var(--white); }
+.cta-outline {
+  display: block;
+  -webkit-text-stroke: 2px var(--cyan);
+  color: transparent;
+}
+.cta-final-desc {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.1em;
+  color: rgba(232,224,255,0.3);
+  margin-bottom: 36px;
+}
+.cta-final-actions {
+  display: flex; align-items: center;
+  justify-content: center; gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+.cta-ghost {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(232,224,255,0.35); text-decoration: none;
+  border-bottom: 1px solid rgba(232,224,255,0.2);
+  padding-bottom: 2px;
+  transition: color .15s, border-color .15s;
+}
+.cta-ghost:hover { color: var(--white); border-color: var(--white); }
+.cta-services {
+  display: flex; align-items: center;
+  justify-content: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.cta-svc {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(232,224,255,0.2);
+}
+.cta-sep {
+  font-family: var(--mono); font-size: 9px;
+  color: rgba(123,47,255,0.4);
+}
+
+/* ══ FEATURES SOCIAL ══ */
+.features-social {
+  padding: 80px 48px;
+}
+.fs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: rgba(232,224,255,0.04);
+}
+.fs-card {
+  background: var(--black);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  transition: background .2s;
+}
+.fs-card:hover { background: rgba(123,47,255,0.05); }
+.fs-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  opacity: 0; transition: opacity .2s;
+}
+.fs-card:hover::after { opacity: 1; }
+.fc1::after { background: var(--cyan); }
+.fc2::after { background: var(--violet); }
+.fc3::after { background: var(--magenta); }
+.fc4::after { background: var(--cyan); }
+.fc5::after { background: var(--cyan); }
+.fc6::after { background: var(--cyan); }
+
+.fs-icon {
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 18px;
+  display: block;
+}
+.fs-title {
+  font-family: var(--display);
+  font-size: 22px; letter-spacing: 0.08em;
+  color: var(--white); text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.fs-body {
+  font-size: 13px; font-weight: 300; line-height: 1.75;
+  color: rgba(232,224,255,0.4);
+  max-width: 340px;
+}
+
+@media (max-width: 900px) {
+  .fs-grid { grid-template-columns: 1fr; }
+  .features-social { padding: 48px 24px; }
+}
 </style>
 </head>
 <body>
@@ -857,6 +1165,8 @@ body::before {
       <a href="#features">Features</a>
       <a href="#about">About</a>
       <a href="galaxy.html" id="nav-galaxy">Galaxy →</a>
+      <a href="#" class="nav-btn-outline">Connexion</a>
+      <a href="#" class="nav-btn-fill">Créer un compte</a>
     </div>
   </nav>
 
@@ -916,8 +1226,67 @@ body::before {
   <div class="cb-black"></div>
 </div>
 
+<!-- ══ STATS BAR ══ -->
+<div class="stats-bar">
+  <div class="stats-bar-item">
+    <div class="sb-num">4</div>
+    <div class="sb-label">Services supportés</div>
+  </div>
+  <div class="stats-bar-item">
+    <div class="sb-num">12M+</div>
+    <div class="sb-label">Titres visualisés</div>
+  </div>
+  <div class="stats-bar-item">
+    <div class="sb-num">100%</div>
+    <div class="sb-label">Données locales</div>
+  </div>
+</div>
+
+<!-- ══ FEATURES SOCIAL ══ -->
+<section class="features-social" id="features">
+  <div class="fs-grid">
+
+    <div class="fs-card fc1">
+      <div class="fs-icon" style="color:#00CFFF">◉</div>
+      <div class="fs-title">Ta Galaxie Unique</div>
+      <div class="fs-body">Chaque bibliothèque génère une sphère 3D unique. Les planètes cristallines reflètent tes artistes, leur taille proportionnelle à ton écoute.</div>
+    </div>
+
+    <div class="fs-card fc2">
+      <div class="fs-icon" style="color:#7B2FFF">◈</div>
+      <div class="fs-title">Profils Publics</div>
+      <div class="fs-body">Partage ta galaxie avec un lien. Tes amis peuvent explorer ton univers musical, voir tes artistes favoris et découvrir tes titres.</div>
+    </div>
+
+    <div class="fs-card fc3">
+      <div class="fs-icon" style="color:#BF00FF">⬡</div>
+      <div class="fs-title">Feed Social</div>
+      <div class="fs-body">Suis d'autres utilisateurs, like leurs galaxies, commente leurs découvertes musicales. Un fil d'actu centré sur la musique.</div>
+    </div>
+
+    <div class="fs-card fc4">
+      <div class="fs-icon" style="color:#00CFFF">⊕</div>
+      <div class="fs-title">Multi-Services</div>
+      <div class="fs-body">Apple Music, Spotify, Deezer, SoundCloud — importe ta bibliothèque depuis n'importe quelle plateforme. 100% local, aucune donnée envoyée.</div>
+    </div>
+
+    <div class="fs-card fc5">
+      <div class="fs-icon" style="color:#00CFFF">◎</div>
+      <div class="fs-title">Oscilloscope Live</div>
+      <div class="fs-body">Survole un morceau — une forme d'onde unique générée depuis le titre apparaît. Chaque musique a sa signature visuelle.</div>
+    </div>
+
+    <div class="fs-card fc6">
+      <div class="fs-icon" style="color:#00CFFF">⊞</div>
+      <div class="fs-title">Découverte</div>
+      <div class="fs-body">Explore les galaxies publiques, filtre par genre, compare tes goûts avec les autres utilisateurs. Découvre de nouveaux artistes.</div>
+    </div>
+
+  </div>
+</section>
+
 <!-- ══ GRID SECTION ══ -->
-<section class="section-grid" id="features">
+<section class="section-grid" id="features-detail">
 
   <div class="grid-cell cell-a">
     <span class="cell-a-num" aria-hidden="true">01</span>
@@ -927,8 +1296,8 @@ body::before {
   </div>
 
   <div class="grid-cell cell-b">
-    <p class="cell-b-big">325</p>
-    <p class="cell-b-label">Planètes / artistes</p>
+    <p class="cell-b-big">Open<br>Source</p>
+    <p class="cell-b-label">100% gratuit · GitHub</p>
   </div>
 
   <div class="grid-cell cell-c">
@@ -948,18 +1317,19 @@ body::before {
       <div class="track-item"><span class="track-num">03</span><span class="track-name">Tooltip oscilloscope sur chaque morceau</span><span class="track-dur">✓</span></div>
       <div class="track-item"><span class="track-num">04</span><span class="track-name">Recherche rapide par nom d'artiste</span><span class="track-dur">✓</span></div>
       <div class="track-item"><span class="track-num">05</span><span class="track-name">Planètes cristal low-poly avec wireframe néon</span><span class="track-dur">✓</span></div>
-      <div class="track-item"><span class="track-num">06</span><span class="track-name">Beads nacrés pour chaque titre en orbite</span><span class="track-dur">✓</span></div>
+      <div class="track-item"><span class="track-num">06</span><span class="track-name">Import Apple Music · Spotify · Deezer · SoundCloud</span><span class="track-dur">✓</span></div>
     </div>
   </div>
 
   <div class="grid-cell cell-f">
-    <p class="cell-f-num">8326</p>
-    <p class="cell-f-label">Titres visualisés</p>
+    <p class="cell-f-num">4</p>
+    <p class="cell-f-label">Services supportés</p>
+    <div class="cell-f-services"><span>Apple Music</span><span>Spotify</span><span>Deezer</span><span>SoundCloud</span></div>
   </div>
 
   <div class="grid-cell cell-g">
     <div class="cell-g-glow"></div>
-    <p class="cell-g-label">// Entrer dans la galaxie</p>
+    <p class="cell-g-label">// Données locales · Aucun serveur</p>
     <p class="cell-g-title">Explorer<br>maintenant</p>
     <button class="btn-galaxy-small" id="btn-enter-galaxy-2">
       <span>◎</span> See my Galaxy
@@ -978,6 +1348,150 @@ body::before {
   <div class="cb-cyan"></div>
   <div class="cb-black"></div>
 </div>
+
+<!-- ══ FEED PROFILS ══ -->
+<section class="profiles-section">
+
+  <div class="profiles-header">
+    <div>
+      <p class="profiles-eyebrow">// Communauté</p>
+      <h2 class="profiles-title">GALAXIES RÉCENTES</h2>
+    </div>
+    <a href="#" class="profiles-see-all">Voir tout →</a>
+  </div>
+
+  <div class="profiles-grid">
+
+    <div class="profile-card">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:linear-gradient(135deg,#7B2FFF,#00CFFF)">NK</div>
+        <div class="pc-info">
+          <div class="pc-name">NEKFEU_FAN</div>
+          <div class="pc-handle">Paris · Apple Music</div>
+        </div>
+        <div class="pc-online">● EN LIGNE</div>
+      </div>
+      <div class="pc-planets">
+        <span class="pc-planet" style="background:#7B2FFF;box-shadow:0 0 8px #7B2FFF"></span>
+        <span class="pc-planet" style="width:8px;height:8px;background:#00CFFF;box-shadow:0 0 6px #00CFFF"></span>
+        <span class="pc-planet" style="width:6px;height:6px;background:#BF00FF;box-shadow:0 0 5px #BF00FF"></span>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat"><span class="pc-stat-v">325</span><span class="pc-stat-l">Artistes</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">8.3k</span><span class="pc-stat-l">Titres</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">847</span><span class="pc-stat-l">Abonnés</span></div>
+      </div>
+      <div class="pc-genres">
+        <span class="pc-genre">Hip-Hop</span>
+        <span class="pc-genre">Rap FR</span>
+        <span class="pc-genre">Jazz</span>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:linear-gradient(135deg,#D85A30,#FF9500)">SC</div>
+        <div class="pc-info">
+          <div class="pc-name">SOREN_C</div>
+          <div class="pc-handle">Lyon · Spotify</div>
+        </div>
+      </div>
+      <div class="pc-planets">
+        <span class="pc-planet" style="background:#D85A30;box-shadow:0 0 8px #D85A30"></span>
+        <span class="pc-planet" style="width:8px;height:8px;background:#FF9500;box-shadow:0 0 6px #FF9500"></span>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat"><span class="pc-stat-v">189</span><span class="pc-stat-l">Artistes</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">4.1k</span><span class="pc-stat-l">Titres</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">312</span><span class="pc-stat-l">Abonnés</span></div>
+      </div>
+      <div class="pc-genres">
+        <span class="pc-genre">Electronic</span>
+        <span class="pc-genre">Techno</span>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:linear-gradient(135deg,#00FF9F,#1D9E75);color:#04030D">JL</div>
+        <div class="pc-info">
+          <div class="pc-name">JAZZ_LOVER</div>
+          <div class="pc-handle">Bordeaux · Deezer</div>
+        </div>
+      </div>
+      <div class="pc-planets">
+        <span class="pc-planet" style="background:#00FF9F;box-shadow:0 0 8px #00FF9F"></span>
+        <span class="pc-planet" style="width:8px;height:8px;background:#1D9E75;box-shadow:0 0 6px #1D9E75"></span>
+        <span class="pc-planet" style="width:6px;height:6px;background:#EF9F27;box-shadow:0 0 5px #EF9F27"></span>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat"><span class="pc-stat-v">241</span><span class="pc-stat-l">Artistes</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">5.7k</span><span class="pc-stat-l">Titres</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">156</span><span class="pc-stat-l">Abonnés</span></div>
+      </div>
+      <div class="pc-genres">
+        <span class="pc-genre">Jazz</span>
+        <span class="pc-genre">Soul</span>
+        <span class="pc-genre">R&B</span>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="pc-top">
+        <div class="pc-avatar" style="background:linear-gradient(135deg,#FF2D78,#BF00FF)">AM</div>
+        <div class="pc-info">
+          <div class="pc-name">ALEX_M</div>
+          <div class="pc-handle">Marseille · SoundCloud</div>
+        </div>
+      </div>
+      <div class="pc-planets">
+        <span class="pc-planet" style="background:#FF2D78;box-shadow:0 0 8px #FF2D78"></span>
+        <span class="pc-planet" style="width:8px;height:8px;background:#BF00FF;box-shadow:0 0 6px #BF00FF"></span>
+        <span class="pc-planet" style="width:6px;height:6px;background:#7B2FFF;box-shadow:0 0 5px #7B2FFF"></span>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat"><span class="pc-stat-v">408</span><span class="pc-stat-l">Artistes</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">9.2k</span><span class="pc-stat-l">Titres</span></div>
+        <div class="pc-stat"><span class="pc-stat-v">523</span><span class="pc-stat-l">Abonnés</span></div>
+      </div>
+      <div class="pc-genres">
+        <span class="pc-genre">Rap US</span>
+        <span class="pc-genre">Drill</span>
+        <span class="pc-genre">Trap</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ CTA FINAL ══ -->
+<section class="cta-final">
+  <div class="cta-final-inner">
+    <div class="cta-final-glow"></div>
+    <p class="cta-final-eyebrow">// Rejoindre SOUNDZ</p>
+    <h2 class="cta-final-title">
+      <span class="cta-white">TON UNIVERS</span>
+      <span class="cta-outline">MUSICAL</span>
+    </h2>
+    <p class="cta-final-desc">Gratuit · Sans pub · Données locales — tes fichiers ne quittent jamais ton navigateur.</p>
+    <div class="cta-final-actions">
+      <button class="btn-galaxy" onclick="openModal()">
+        <span class="btn-galaxy-icon">◎</span>
+        Créer ma galaxie
+      </button>
+      <a href="#explore" class="cta-ghost">Explorer d'abord →</a>
+    </div>
+    <div class="cta-services">
+      <span class="cta-svc">Apple Music</span>
+      <span class="cta-sep">//</span>
+      <span class="cta-svc">Spotify</span>
+      <span class="cta-sep">//</span>
+      <span class="cta-svc">Deezer</span>
+      <span class="cta-sep">//</span>
+      <span class="cta-svc">SoundCloud</span>
+    </div>
+  </div>
+</section>
 
 <!-- ══ FOOTER ══ -->
 <footer class="footer" id="about">

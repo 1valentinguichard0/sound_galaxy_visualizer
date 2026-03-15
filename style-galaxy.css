@@ -129,9 +129,12 @@ body::after {
 .logo-dot { color: var(--amber); }
 
 #bios-tag {
-  font-family: var(--mono);
-  font-size: 8px; letter-spacing: 0.18em;
-  color: var(--dim);
+  font-family: var(--title);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--phosphor);
+  text-shadow: 0 0 14px rgba(0,255,159,0.55);
 }
 
 #top-center {
@@ -228,19 +231,7 @@ body::after {
 .btn-bracket { color: var(--amber); }
 #back-btn:hover { background: var(--phosphor); color: var(--bg); border-color: var(--phosphor); }
 
-/* ── HOME BUTTON ── */
-#home-btn {
-  position: absolute; top: 16px; right: 20px;
-  font-family: var(--mono); font-size: 10px;
-  letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(0,255,159,0.4); background: transparent;
-  border: 1px solid rgba(0,255,159,0.18); padding: 6px 14px;
-  cursor: none; display: block; pointer-events: auto;
-  text-decoration: none;
-  transition: color .15s, border-color .15s;
-  clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);
-}
-#home-btn:hover { color: var(--phosphor); border-color: var(--border); }
+
 
 /* ── ARTIST PANEL ── */
 #artist-panel {

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOUNDZ — Mon Profil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,300;0,400;0,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #06040F; --white: #E8E0FF;
+  --violet: #7B2FFF; --cyan: #00CFFF;
+  --indigo: #3D00CC; --magenta: #BF00FF;
+  --display: 'Bebas Neue', sans-serif;
+  --cond: 'Barlow Condensed', sans-serif;
+  --mono: 'Share Tech Mono', monospace;
+}
+body { background: var(--bg); color: var(--white); font-family: var(--cond); min-height: 100vh; }
+
+/* Scan lines */
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0px, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+  pointer-events: none; z-index: 9998;
+}
+
+/* ── NAV ── */
+nav {
+  height: 56px; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 40px;
+  border-bottom: 1px solid rgba(123,47,255,0.2);
+  background: rgba(6,4,15,0.9); backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-logo {
+  font-family: var(--display); font-size: 22px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  text-decoration: none;
+}
+.nav-right { display: flex; gap: 12px; align-items: center; }
+.btn-sm {
+  padding: 6px 16px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+  text-decoration: none; transition: .15s;
+}
+.btn-sm-outline { background: transparent; border: 1px solid rgba(123,47,255,0.4); color: rgba(232,224,255,0.6); }
+.btn-sm-outline:hover { border-color: var(--violet); color: var(--white); }
+.btn-sm-fill { background: var(--violet); border: 1px solid var(--violet); color: var(--white); }
+.btn-sm-fill:hover { background: #9B4FFF; }
+
+/* ── MAIN ── */
+main { max-width: 900px; margin: 0 auto; padding: 60px 40px; }
+
+/* ── LOADING ── */
+#loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 60vh; gap: 16px;
+}
+.loading-text {
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.16em; color: rgba(232,224,255,0.3);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── NOT LOGGED ── */
+#not-logged {
+  display: none; flex-direction: column; align-items: center;
+  justify-content: center; height: 60vh; gap: 20px; text-align: center;
+}
+.nl-title { font-family: var(--display); font-size: 48px; color: var(--white); }
+.nl-sub { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: rgba(232,224,255,0.3); }
+.nl-btn {
+  padding: 12px 28px; font-family: var(--display); font-size: 20px;
+  letter-spacing: 0.12em; background: var(--violet); color: var(--white);
+  border: none; cursor: pointer; text-decoration: none;
+  clip-path: polygon(10px 0%, calc(100% - 10px) 0%, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0% calc(100% - 10px), 0% 10px);
+}
+
+/* ── PROFILE CONTENT ── */
+#profile-content { display: none; }
+
+.profile-header {
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 28px; align-items: center;
+  padding-bottom: 32px;
+  border-bottom: 1px solid rgba(123,47,255,0.2);
+  margin-bottom: 40px;
+}
+.profile-avatar {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 22px; font-weight: bold;
+  color: var(--white); flex-shrink: 0;
+  box-shadow: 0 0 24px rgba(123,47,255,0.4);
+}
+.profile-info { display: flex; flex-direction: column; gap: 4px; }
+.profile-username {
+  font-family: var(--display); font-size: 40px;
+  letter-spacing: 0.06em; line-height: 1;
+  color: var(--white);
+}
+.profile-meta {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.14em; color: rgba(232,224,255,0.3);
+  text-transform: uppercase;
+}
+.profile-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* Galaxy section */
+.section-label {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.22em; color: var(--cyan);
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.galaxy-block {
+  border: 1px solid rgba(123,47,255,0.25);
+  background: rgba(123,47,255,0.04);
+  padding: 28px; margin-bottom: 32px;
+  position: relative; overflow: hidden;
+}
+.galaxy-block::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--violet), transparent);
+}
+.galaxy-empty {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; color: rgba(232,224,255,0.25);
+  text-align: center; padding: 20px 0;
+}
+.galaxy-loaded {
+  display: none;
+}
+.galaxy-stats { display: flex; gap: 32px; margin-bottom: 20px; }
+.gs-item { display: flex; flex-direction: column; gap: 3px; }
+.gs-val { font-family: var(--mono); font-size: 20px; color: var(--white); }
+.gs-lbl { font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; color: rgba(232,224,255,0.3); text-transform: uppercase; }
+
+.btn-galaxy-launch {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 12px 24px; font-family: var(--display); font-size: 18px;
+  letter-spacing: 0.1em; background: linear-gradient(135deg, var(--violet), var(--indigo));
+  color: var(--white); border: none; cursor: pointer; text-decoration: none;
+  clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);
+  transition: opacity .15s;
+}
+.btn-galaxy-launch:hover { opacity: 0.85; }
+
+.btn-import {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  background: transparent; border: 1px solid rgba(123,47,255,0.4);
+  color: rgba(232,224,255,0.6); cursor: pointer; transition: .15s;
+}
+.btn-import:hover { border-color: var(--violet); color: var(--white); }
+
+/* Service badge */
+.svc-badge {
+  display: inline-block; font-family: var(--mono); font-size: 8px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 3px 9px; border: 1px solid rgba(0,207,255,0.3);
+  color: var(--cyan); background: rgba(0,207,255,0.08);
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">SOUNDZ</a>
+  <div class="nav-right">
+    <span id="nav-user" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.14em;color:rgba(232,224,255,0.4)"></span>
+    <a href="index.html" class="btn-sm btn-sm-outline">← Accueil</a>
+    <button class="btn-sm btn-sm-outline" id="btn-signout">Déconnexion</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- Chargement -->
+  <div id="loading">
+    <div class="loading-text">// Chargement du profil…</div>
+  </div>
+
+  <!-- Non connecté -->
+  <div id="not-logged">
+    <div class="nl-title">ACCÈS RESTREINT</div>
+    <div class="nl-sub">// Connecte-toi pour voir ton profil</div>
+    <a href="index.html" class="nl-btn">◎ &nbsp; Retour à l'accueil</a>
+  </div>
+
+  <!-- Profil connecté -->
+  <div id="profile-content">
+
+    <div class="profile-header">
+      <div class="profile-avatar" id="profile-avatar"></div>
+      <div class="profile-info">
+        <div class="profile-username" id="profile-username">—</div>
+        <div class="profile-meta" id="profile-meta">Membre SOUNDZ</div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-sm btn-sm-outline" id="btn-signout-2">Déconnexion</button>
+      </div>
+    </div>
+
+    <!-- Ma Galaxie -->
+    <p class="section-label">// Ma Galaxie</p>
+    <div class="galaxy-block">
+      <div class="galaxy-empty" id="galaxy-empty">
+        // Aucune galaxie générée — importe ta bibliothèque musicale
+      </div>
+      <div class="galaxy-loaded" id="galaxy-loaded">
+        <div class="galaxy-stats">
+          <div class="gs-item"><span class="gs-val" id="gs-artists">—</span><span class="gs-lbl">Artistes</span></div>
+          <div class="gs-item"><span class="gs-val" id="gs-tracks">—</span><span class="gs-lbl">Titres</span></div>
+          <div class="gs-item"><span class="gs-val" id="gs-service">—</span><span class="gs-lbl">Service</span></div>
+        </div>
+        <a href="galaxy.html" class="btn-galaxy-launch">◎ &nbsp; Explorer ma galaxie</a>
+      </div>
+    </div>
+
+    <p class="section-label">// Importer une bibliothèque</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn-import" onclick="window.location.href='index.html#import'">
+        ⊕ &nbsp; Importer ma bibliothèque
+      </button>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const { createClient } = supabase;
+const _sb = createClient(
+  'https://wsdpaxkjaykxuzexzjqp.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZHBheGtqYXlreHV6ZXh6anFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODA3NzMsImV4cCI6MjA4OTI1Njc3M30.ZH8gM25abDmP2Mf0zFNBJvf6EU2uIH4Lb-2-kpdlR7I'
+);
+
+const COLORS = ['#7B2FFF','#00CFFF','#BF00FF','#D85A30','#1D9E75','#FF2D78','#EF9F27'];
+
+async function init() {
+  const { data: { session } } = await _sb.auth.getSession();
+
+  document.getElementById('loading').style.display = 'none';
+
+  if (!session) {
+    document.getElementById('not-logged').style.display = 'flex';
+    return;
+  }
+
+  const user = session.user;
+  const username = user.user_metadata?.username || user.email.split('@')[0];
+  const initials = username.slice(0,2).toUpperCase();
+  const color = COLORS[username.charCodeAt(0) % COLORS.length];
+
+  // Nav
+  document.getElementById('nav-user').textContent = '// ' + username.toUpperCase();
+
+  // Avatar
+  const av = document.getElementById('profile-avatar');
+  av.textContent = initials;
+  av.style.background = `linear-gradient(135deg, ${color}, ${COLORS[(COLORS.indexOf(color)+1)%COLORS.length]})`;
+
+  // Infos
+  document.getElementById('profile-username').textContent = username.toUpperCase();
+  document.getElementById('profile-meta').textContent =
+    '// Membre depuis ' + new Date(user.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+  // Galaxie en session ?
+  const sgv = sessionStorage.getItem('sgv_source');
+  const sgvData = sessionStorage.getItem('sgv_data');
+  if (sgvData) {
+    try {
+      const data = JSON.parse(sgvData);
+      const total = data.reduce((s,a) => s + a.trackCount, 0);
+      document.getElementById('gs-artists').textContent = data.length;
+      document.getElementById('gs-tracks').textContent  = total.toLocaleString('fr-FR');
+      document.getElementById('gs-service').textContent = (sgv || 'import').toUpperCase();
+      document.getElementById('galaxy-empty').style.display  = 'none';
+      document.getElementById('galaxy-loaded').style.display = 'block';
+    } catch(e) {}
+  }
+
+  document.getElementById('profile-content').style.display = 'block';
+
+  // Déconnexion
+  const logout = async () => {
+    await _sb.auth.signOut();
+    window.location.href = 'index.html';
+  };
+  document.getElementById('btn-signout').addEventListener('click', logout);
+  document.getElementById('btn-signout-2').addEventListener('click', logout);
+}
+
+init();
+</script>
+</body>
+</html>

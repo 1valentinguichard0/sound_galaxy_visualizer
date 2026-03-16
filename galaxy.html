@@ -40,8 +40,6 @@
         <div class="stat-val" id="stat-tracks">—</div>
         <div class="stat-lbl">TITRES</div>
       </div>
-    <div class="stat-sep">//</div>
-      <a href="index.html" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(0,255,159,0.4);text-decoration:none;transition:color .15s;padding:0 4px 0 0;" onmouseover="this.style.color='#00ff9f'" onmouseout="this.style.color='rgba(0,255,159,0.4)'">⌂ HOME</a>
     </div>
   </header>
 
@@ -49,7 +47,9 @@
     <span class="btn-bracket">[</span> ← GALAXIE <span class="btn-bracket">]</span>
   </button>
 
-
+  <a href="index.html" id="home-btn">
+    <span class="btn-bracket">[</span> ⌂ HOME <span class="btn-bracket">]</span>
+  </a>
 
   <div id="artist-panel">
     <div id="artist-panel-inner">
@@ -84,29 +84,50 @@
 <canvas id="c"></canvas>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Charger data.js seulement si pas de données importées en session
 (function() {
   const raw = sessionStorage.getItem('sgv_data');
   if (raw) {
     try {
       window.MUSIC_DATA = JSON.parse(raw);
       sessionStorage.removeItem('sgv_data');
-      console.log('SGV: données importées chargées —', window.MUSIC_DATA.length, 'artistes');
-    } catch(e) {
-      console.warn('SGV: erreur sessionStorage, fallback data.js');
-      window.MUSIC_DATA = null;
-    }
+    } catch(e) { window.MUSIC_DATA = null; }
   }
 })();
 </script>
 <script>
-// Injecter data.js dynamiquement seulement si MUSIC_DATA n'est pas défini
-if (!window.MUSIC_DATA) {
-  document.write('<script src="data.js"><\/script>');
-}
+(async function() {
+  function loadMain() {
+    var s = document.createElement('script');
+    s.src = 'main.js';
+    document.body.appendChild(s);
+  }
+
+  // Données importées en session — pas besoin de vérifier l'auth
+  if (window.MUSIC_DATA) { loadMain(); return; }
+
+  // Vérifier si Valz est connecté pour charger data.js
+  const { createClient } = supabase;
+  const _sb = createClient(
+    'https://wsdpaxkjaykxuzexzjqp.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZHBheGtqYXlreHV6ZXh6anFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2ODA3NzMsImV4cCI6MjA4OTI1Njc3M30.ZH8gM25abDmP2Mf0zFNBJvf6EU2uIH4Lb-2-kpdlR7I'
+  );
+
+  const { data: { session } } = await _sb.auth.getSession();
+  const username = (session?.user?.user_metadata?.username || '').toLowerCase();
+
+  if (username === 'valz') {
+    var s = document.createElement('script');
+    s.src = 'data.js';
+    s.onload = loadMain;
+    document.body.appendChild(s);
+  } else {
+    // Pas Valz, pas de données → retour à l'accueil
+    window.location.href = 'index.html';
+  }
+})();
 </script>
-<script src="main.js"></script>
 <script>
 window.addEventListener('load', () => {
   const o = document.getElementById('entry-overlay');

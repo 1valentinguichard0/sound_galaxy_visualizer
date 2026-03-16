@@ -1684,7 +1684,7 @@ body::before {
           <div class="opt-format">Fichier .csv via Soundiiz</div>
           <div class="opt-badge violet">TIERS</div>
         </div>
-        <div class="import-option mine" onclick="selectService('mine')" id="opt-mine">
+        <div class="import-option mine" onclick="selectService('mine')" id="opt-mine" style="display:none;">
           <div class="opt-service">Utiliser ma bibliothèque ✦</div>
           <div class="opt-format">data.js déjà chargé · 325 artistes · 8 326 titres</div>
         </div>
@@ -1980,23 +1980,42 @@ function buildArtistArray(artistMap) {
 }
 
 // ── LAUNCH ──
-function launchGalaxy() {
+async function launchGalaxy() {
   if (selectedService === 'mine') {
-    // Utiliser data.js existant — transition directe
     doTransition();
     return;
   }
   if (!parsedData || !parsedData.length) return;
 
-  // Stocker les données parsées dans sessionStorage pour galaxy.html
+  // Stocker dans sessionStorage pour galaxy.html
+  const dataToStore = parsedData.slice(0, 300).map(a => ({...a, tracks: a.tracks.slice(0, 100)}));
   try {
-    sessionStorage.setItem('sgv_data', JSON.stringify(parsedData));
+    sessionStorage.setItem('sgv_data', JSON.stringify(dataToStore));
   } catch(e) {
-    // Si trop gros pour sessionStorage, on tronque à 200 artistes
-    const trimmed = parsedData.slice(0, 200).map(a => ({...a, tracks: a.tracks.slice(0, 50)}));
+    const trimmed = parsedData.slice(0, 150).map(a => ({...a, tracks: a.tracks.slice(0, 30)}));
     sessionStorage.setItem('sgv_data', JSON.stringify(trimmed));
   }
   sessionStorage.setItem('sgv_source', selectedService);
+
+  // Sauvegarder dans Supabase si connecté
+  if (currentUser) {
+    const totalTracks = parsedData.reduce((s,a) => s + a.trackCount, 0);
+    try {
+      await _sb.from('galaxies').upsert({
+        user_id:      currentUser.id,
+        data:         dataToStore,
+        service:      selectedService,
+        artist_count: parsedData.length,
+        track_count:  totalTracks,
+        is_public:    true,
+        updated_at:   new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+      setStatus('// ✓ Galaxie sauvegardée · ' + parsedData.length + ' artistes', 'ok');
+    } catch(e) {
+      console.warn('Sauvegarde Supabase échouée:', e);
+    }
+  }
+
   doTransition();
 }
 
@@ -2106,13 +2125,23 @@ function setUserConnected(user) {
   document.getElementById('nav-auth-out').style.display = 'none';
   document.getElementById('nav-auth-in').style.display  = 'flex';
   document.getElementById('nav-username').textContent   = '// ' + username.toUpperCase();
+
+  // Afficher "Ma bibliothèque" seulement pour Valz
+  if (username.toLowerCase() === 'valz') {
+    document.getElementById('opt-mine').style.display = 'block';
+  } else {
+    document.getElementById('opt-mine').style.display = 'none';
+  }
 }
 
 function setUserDisconnected() {
   currentUser = null;
   document.getElementById('nav-auth-out').style.display = 'flex';
   document.getElementById('nav-auth-in').style.display  = 'none';
+  document.getElementById('opt-mine').style.display = 'none';
 }
+
+
 
 // ── OPEN / CLOSE AUTH MODAL ──
 function openAuth(view = 'login') {

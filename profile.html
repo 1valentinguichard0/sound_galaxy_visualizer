@@ -218,7 +218,8 @@ main { max-width: 900px; margin: 0 auto; padding: 60px 40px; }
           <div class="gs-item"><span class="gs-val" id="gs-tracks">—</span><span class="gs-lbl">Titres</span></div>
           <div class="gs-item"><span class="gs-val" id="gs-service">—</span><span class="gs-lbl">Service</span></div>
         </div>
-        <a href="galaxy.html" class="btn-galaxy-launch">◎ &nbsp; Explorer ma galaxie</a>
+        <div id="galaxy-updated" style="font-family:'Share Tech Mono',monospace;font-size:8px;letter-spacing:0.12em;color:rgba(232,224,255,0.25);margin:8px 0 16px;"></div>
+        <button id="btn-launch-galaxy" class="btn-galaxy-launch">◎ &nbsp; Explorer ma galaxie</button>
       </div>
     </div>
 
@@ -270,19 +271,37 @@ async function init() {
   document.getElementById('profile-meta').textContent =
     '// Membre depuis ' + new Date(user.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
-  // Galaxie en session ?
-  const sgv = sessionStorage.getItem('sgv_source');
-  const sgvData = sessionStorage.getItem('sgv_data');
-  if (sgvData) {
-    try {
-      const data = JSON.parse(sgvData);
-      const total = data.reduce((s,a) => s + a.trackCount, 0);
-      document.getElementById('gs-artists').textContent = data.length;
-      document.getElementById('gs-tracks').textContent  = total.toLocaleString('fr-FR');
-      document.getElementById('gs-service').textContent = (sgv || 'import').toUpperCase();
-      document.getElementById('galaxy-empty').style.display  = 'none';
-      document.getElementById('galaxy-loaded').style.display = 'block';
-    } catch(e) {}
+  // Charger la galaxie depuis Supabase
+  const { data: galaxyRow } = await _sb
+    .from('galaxies')
+    .select('artist_count, track_count, service, data, updated_at')
+    .eq('user_id', user.id)
+    .single();
+
+  if (galaxyRow) {
+    document.getElementById('gs-artists').textContent = galaxyRow.artist_count.toLocaleString('fr-FR');
+    document.getElementById('gs-tracks').textContent  = galaxyRow.track_count.toLocaleString('fr-FR');
+    document.getElementById('gs-service').textContent = (galaxyRow.service || 'import').toUpperCase();
+
+    const updated = new Date(galaxyRow.updated_at).toLocaleDateString('fr-FR', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+    document.getElementById('galaxy-updated').textContent = '// Mise à jour le ' + updated;
+
+    // Remettre les données en session pour pouvoir relancer la galaxie
+    document.getElementById('btn-launch-galaxy').addEventListener('click', () => {
+      try {
+        sessionStorage.setItem('sgv_data', JSON.stringify(galaxyRow.data));
+        sessionStorage.setItem('sgv_source', galaxyRow.service);
+      } catch(e) {
+        const trim = galaxyRow.data.slice(0,150).map(a=>({...a,tracks:a.tracks.slice(0,30)}));
+        sessionStorage.setItem('sgv_data', JSON.stringify(trim));
+      }
+      window.location.href = 'galaxy.html';
+    });
+
+    document.getElementById('galaxy-empty').style.display  = 'none';
+    document.getElementById('galaxy-loaded').style.display = 'block';
   }
 
   document.getElementById('profile-content').style.display = 'block';

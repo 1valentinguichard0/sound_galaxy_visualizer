@@ -150,12 +150,18 @@ main { max-width: 1200px; margin: 0 auto; padding: 48px 40px; }
 .gc-date { font-family: var(--mono); font-size: 8px; letter-spacing: 0.1em;
   color: rgba(232,224,255,0.2); }
 
+/* ── CARD FOOTER (explore + like) ── */
+.gc-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin-top: 2px;
+}
+
 .gc-explore {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 14px; font-family: var(--mono); font-size: 9px;
   letter-spacing: 0.14em; text-transform: uppercase;
   background: rgba(123,47,255,0.15); border: 1px solid rgba(123,47,255,0.3);
-  color: rgba(232,224,255,0.6); transition: .15s; align-self: flex-start;
+  color: rgba(232,224,255,0.6); transition: .15s;
 }
 .galaxy-card:hover .gc-explore { background: rgba(123,47,255,0.3); color: var(--white); border-color: var(--violet); }
 
@@ -166,10 +172,20 @@ main { max-width: 1200px; margin: 0 auto; padding: 48px 40px; }
   letter-spacing: 0.12em; text-transform: uppercase;
   background: transparent; border: 1px solid rgba(232,224,255,0.1);
   color: rgba(232,224,255,0.35); cursor: pointer; transition: .15s;
+  flex-shrink: 0;
 }
 .like-btn:hover { border-color: rgba(191,0,255,0.4); color: var(--magenta); }
-.like-btn.liked { border-color: rgba(191,0,255,0.5); color: var(--magenta);
-  background: rgba(191,0,255,0.08); }
+.like-btn.liked {
+  border-color: rgba(191,0,255,0.5); color: var(--magenta);
+  background: rgba(191,0,255,0.08);
+}
+/* Pulse animation on like */
+@keyframes like-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.like-btn.pop { animation: like-pop 0.3s ease; }
 
 /* ── TABS ── */
 .tabs {
@@ -219,12 +235,12 @@ main { max-width: 1200px; margin: 0 auto; padding: 48px 40px; }
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" onclick="filterBy('all')">Toutes</button>
+    <button class="filter-btn active" onclick="filterBy('all', event)">Toutes</button>
     <span class="filter-sep">//</span>
-    <button class="filter-btn" onclick="filterBy('apple')">Apple Music</button>
-    <button class="filter-btn" onclick="filterBy('spotify')">Spotify</button>
-    <button class="filter-btn" onclick="filterBy('deezer')">Deezer</button>
-    <button class="filter-btn" onclick="filterBy('soundcloud')">SoundCloud</button>
+    <button class="filter-btn" onclick="filterBy('apple', event)">Apple Music</button>
+    <button class="filter-btn" onclick="filterBy('spotify', event)">Spotify</button>
+    <button class="filter-btn" onclick="filterBy('deezer', event)">Deezer</button>
+    <button class="filter-btn" onclick="filterBy('soundcloud', event)">SoundCloud</button>
   </div>
 
   <div id="loading">
@@ -260,25 +276,56 @@ let likedIds = new Set();
 let followingIds = new Set();
 let currentUser = null;
 
-async function toggleLike(btn, galaxyId) {
+// ── LIKE ──
+// FIX 1 : stopPropagation pour ne pas déclencher le lien de la carte
+// FIX 2 : mise à jour de likes_count dans Supabase (RPC ou update direct)
+async function toggleLike(e, btn, galaxyId) {
+  e.preventDefault();
+  e.stopPropagation(); // empêche la navigation vers le profil
+
   if (!currentUser) { window.location.href = 'index.html'; return; }
+
+  // Empêcher le double-clic pendant la requête
+  if (btn.dataset.loading === 'true') return;
+  btn.dataset.loading = 'true';
+
   const isLiked = btn.dataset.liked === 'true';
   const countEl = btn.querySelector('.like-count');
   let count = parseInt(countEl.textContent) || 0;
 
+  // Animation pop
+  btn.classList.remove('pop');
+  void btn.offsetWidth; // reflow pour relancer l'animation
+  btn.classList.add('pop');
+
   if (isLiked) {
-    await _sb.from('likes').delete().eq('user_id', currentUser.id).eq('galaxy_id', galaxyId);
-    likedIds.delete(galaxyId);
-    btn.dataset.liked = 'false';
-    btn.classList.remove('liked');
-    countEl.textContent = Math.max(0, count - 1);
+    const { error } = await _sb.from('likes').delete()
+      .eq('user_id', currentUser.id)
+      .eq('galaxy_id', galaxyId);
+    if (!error) {
+      likedIds.delete(galaxyId);
+      btn.dataset.liked = 'false';
+      btn.classList.remove('liked');
+      countEl.textContent = Math.max(0, count - 1);
+      // Décrémenter dans la table galaxies
+      await _sb.rpc('decrement_likes', { gid: galaxyId });
+    }
   } else {
-    await _sb.from('likes').insert({ user_id: currentUser.id, galaxy_id: galaxyId });
-    likedIds.add(galaxyId);
-    btn.dataset.liked = 'true';
-    btn.classList.add('liked');
-    countEl.textContent = count + 1;
+    const { error } = await _sb.from('likes').insert({
+      user_id: currentUser.id,
+      galaxy_id: galaxyId
+    });
+    if (!error) {
+      likedIds.add(galaxyId);
+      btn.dataset.liked = 'true';
+      btn.classList.add('liked');
+      countEl.textContent = count + 1;
+      // Incrémenter dans la table galaxies
+      await _sb.rpc('increment_likes', { gid: galaxyId });
+    }
   }
+
+  btn.dataset.loading = 'false';
 }
 
 async function switchTab(tab, btn) {
@@ -287,7 +334,6 @@ async function switchTab(tab, btn) {
   btn.classList.add('active');
 
   if (tab === 'following') {
-    // Charger galaxies des gens suivis
     if (followingIds.size === 0) { renderGalaxies([]); return; }
     const { data } = await _sb
       .from('galaxies')
@@ -295,7 +341,6 @@ async function switchTab(tab, btn) {
       .eq('is_public', true)
       .in('user_id', [...followingIds])
       .order('updated_at', { ascending: false });
-    // Enrichir avec les profils
     if (data && data.length > 0) {
       const uids = [...new Set(data.map(g => g.user_id))];
       const { data: profs } = await _sb.from('profiles').select('id, username, avatar_color').in('id', uids);
@@ -328,19 +373,17 @@ function timeAgo(dateStr) {
 }
 
 async function init() {
-  // Auth
   const { data: { session } } = await _sb.auth.getSession();
   if (session) {
     currentUser = session.user;
     const username = session.user.user_metadata?.username || session.user.email.split('@')[0];
     document.getElementById('nav-user').textContent = '// ' + username.toUpperCase();
     document.getElementById('btn-profile').style.display = 'block';
-    document.getElementById('tab-following').style.display = 'block';
+    // FIX 3 : tab-following affiché une seule fois, après le chargement des follows
   } else {
     document.getElementById('btn-login').style.display = 'block';
   }
 
-  // Charger les galaxies publiques — deux requêtes séparées pour éviter le join
   const { data: galaxiesData, error } = await _sb
     .from('galaxies')
     .select('id, artist_count, track_count, service, updated_at, likes_count, user_id')
@@ -356,14 +399,12 @@ async function init() {
     return;
   }
 
-  // Charger les profils correspondants
   const userIds = [...new Set(galaxiesData.map(g => g.user_id))];
   const { data: profilesData } = await _sb
     .from('profiles')
     .select('id, username, avatar_color')
     .in('id', userIds);
 
-  // Merger les données
   const profileMap = {};
   (profilesData || []).forEach(p => { profileMap[p.id] = p; });
   const data = galaxiesData.map(g => ({
@@ -374,7 +415,7 @@ async function init() {
   allGalaxies = data;
   document.getElementById('page-sub').textContent = `// ${data.length} galaxie${data.length > 1 ? 's' : ''} publique${data.length > 1 ? 's' : ''}`;
 
-  // Charger les likes et follows de l'utilisateur connecté
+  // Charger likes + follows en parallèle
   if (session) {
     const [likesRes, followsRes] = await Promise.all([
       _sb.from('likes').select('galaxy_id').eq('user_id', session.user.id),
@@ -383,10 +424,10 @@ async function init() {
     if (likesRes.data) likedIds = new Set(likesRes.data.map(l => l.galaxy_id));
     if (followsRes.data) {
       followingIds = new Set(followsRes.data.map(f => f.following_id));
-      // Afficher l'onglet "Mes abonnements" si on suit des gens
-      if (followingIds.size > 0) {
-        document.getElementById('tab-following').style.display = 'block';
-      }
+    }
+    // FIX 3 : afficher l'onglet follows ici uniquement, une seule fois
+    if (followingIds.size > 0) {
+      document.getElementById('tab-following').style.display = 'block';
     }
   }
 
@@ -409,11 +450,14 @@ function renderGalaxies(galaxies) {
     const color2   = COLORS[(COLORS.indexOf(color) + 1) % COLORS.length];
     const initials = getInitials(username);
 
-    // Mini planètes colorées
     const planetColors = [color, color2, COLORS[(COLORS.indexOf(color) + 3) % COLORS.length]];
-    const planetsHTML = planetColors.map((c, i) => 
+    const planetsHTML = planetColors.map((c, i) =>
       `<span class="gc-planet" style="width:${12 - i*2}px;height:${12 - i*2}px;background:${c};box-shadow:0 0 ${6-i}px ${c}"></span>`
     ).join('');
+
+    // FIX 1 : like button inclus dans la carte, avec stopPropagation
+    const isLiked   = likedIds.has(g.id);
+    const likeCount = g.likes_count || 0;
 
     const card = document.createElement('a');
     card.className = 'galaxy-card';
@@ -436,22 +480,32 @@ function renderGalaxies(galaxies) {
           <span class="gc-stat-v">${g.track_count?.toLocaleString('fr-FR')}</span>
           <span class="gc-stat-l">Titres</span>
         </div>
-        <div class="gc-stat">
-          <span class="gc-stat-v">${g.likes_count || 0}</span>
-          <span class="gc-stat-l">Likes</span>
-        </div>
       </div>
       <div class="gc-date">// ${timeAgo(g.updated_at)}</div>
-      <div class="gc-explore">◎ &nbsp; Explorer cette galaxie</div>
+      <div class="gc-footer">
+        <div class="gc-explore">◎ &nbsp; Explorer cette galaxie</div>
+        <button
+          class="like-btn${isLiked ? ' liked' : ''}"
+          data-liked="${isLiked}"
+          data-loading="false"
+          title="${isLiked ? 'Retirer le like' : 'Liker cette galaxie'}"
+        >♡ <span class="like-count">${likeCount}</span></button>
+      </div>
     `;
+
+    // Attacher l'event listener sur le bouton (évite les inline handlers)
+    const likeBtn = card.querySelector('.like-btn');
+    likeBtn.addEventListener('click', (e) => toggleLike(e, likeBtn, g.id));
+
     grid.appendChild(card);
   });
 }
 
-function filterBy(service) {
+// FIX 2 : event passé explicitement en paramètre
+function filterBy(service, e) {
   currentFilter = service;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
 
   const filtered = service === 'all'
     ? allGalaxies

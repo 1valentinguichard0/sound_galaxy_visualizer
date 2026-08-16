@@ -169,7 +169,9 @@ function goBack() {
   if (raw) {
     try {
       window.MUSIC_DATA = JSON.parse(raw);
+      window.MUSIC_SERVICE = sessionStorage.getItem('sgv_source') || null;
       sessionStorage.removeItem('sgv_data');
+      sessionStorage.removeItem('sgv_source');
       loadMain();
       return;
     } catch(e) {}
@@ -189,12 +191,13 @@ function goBack() {
   document.getElementById('overlay-status').textContent = '// SYNCHRO SUPABASE…';
   const { data: galaxyRow } = await _sb
     .from('galaxies')
-    .select('data')
+    .select('data, service')
     .eq('user_id', session.user.id)
     .maybeSingle();
 
   if (galaxyRow && galaxyRow.data && galaxyRow.data.length > 0) {
     window.MUSIC_DATA = galaxyRow.data;
+    window.MUSIC_SERVICE = galaxyRow.service || null;
     loadMain();
   } else {
     navigateOut({ preventDefault: () => {} }, 'index.html');

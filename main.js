@@ -173,6 +173,16 @@ function hexToRgbaString(hex, alpha) {
 
 const beadTexWhite = makeStarTexture('#a0c8ff');
 
+// Cache des textures d'étoile par couleur — évite de régénérer un canvas
+// (et un upload GPU) à chaque planète si plusieurs artistes partagent une couleur.
+const _starTexCache = new Map();
+function getStarTexture(hexColor) {
+  if (!_starTexCache.has(hexColor)) {
+    _starTexCache.set(hexColor, makeStarTexture(hexColor));
+  }
+  return _starTexCache.get(hexColor);
+}
+
 // ── VINYL DISC — disque avec sillons, anti z-fighting ──
 function makeVinylDisc(outerR, col, tiltX, tiltZ) {
   const group = new THREE.Group();
@@ -417,10 +427,11 @@ GALAXY_DATA.forEach((artist, i) => {
   });
   sphere.add(new THREE.Mesh(glowGeo, glowMat));
 
-  // ── Vinyle cyberpunk ──
+  // ── Anneau simple (perf) — la vue galaxie affiche 500 planètes en même
+  // temps, le disque vinyle 13-meshes est réservé à la vue "un artiste".
   const ringTiltX = Math.PI * 0.5 + (Math.random() - 0.5) * 0.35;
   const ringTiltZ = (Math.random() - 0.5) * 0.35;
-  sphere.add(makeVinylDisc(planetR * 2.0, col, ringTiltX, ringTiltZ));
+  sphere.add(makeSimpleRing(planetR * 2.0, col, ringTiltX, ringTiltZ));
 
   // ── Satellite beads (tracks preview) ──
   const satPos = [];
@@ -433,7 +444,7 @@ GALAXY_DATA.forEach((artist, i) => {
   }
   const satGeo = new THREE.BufferGeometry();
   satGeo.setAttribute('position', new THREE.Float32BufferAttribute(satPos, 3));
-  const beadTex = makeStarTexture(artist.color);
+  const beadTex = getStarTexture(artist.color);
   sphere.add(new THREE.Points(satGeo, new THREE.PointsMaterial({
     map:          beadTex,
     size:         0.55,
@@ -460,7 +471,8 @@ function enterArtist(artist) {
 
   document.getElementById('back-btn').style.display     = 'block';
   document.getElementById('top-bar').style.display      = 'none';
-  document.getElementById('hint').style.opacity         = '0';
+  document.getElementById('hint').textContent           = 'CLIC SUR UN MORCEAU POUR L\'OUVRIR';
+  document.getElementById('hint').style.opacity          = '1';
   document.getElementById('artist-panel').style.display = 'block';
   document.getElementById('artist-panel').style.animation = 'fadeUp .4s ease both';
   document.getElementById('ap-genre').textContent = artist.genre.toUpperCase();
@@ -537,7 +549,8 @@ function backToGalaxy() {
 
   document.getElementById('back-btn').style.display     = 'none';
   document.getElementById('top-bar').style.display      = 'flex';
-  document.getElementById('hint').style.opacity         = '1';
+  document.getElementById('hint').textContent            = 'DRAG · ZOOM · CLICK SUR UNE PLANÈTE';
+  document.getElementById('hint').style.opacity          = '1';
   document.getElementById('artist-panel').style.display = 'none';
 
   hideTooltip();
@@ -727,8 +740,35 @@ canvas.addEventListener('click', () => {
   if (mode === 'galaxy') {
     const hits = raycaster.intersectObjects(planetMeshes, false);
     if (hits.length > 0) enterArtist(hits[0].object.userData.artist);
+  } else if (mode === 'artist' && artistTrackPoints) {
+    const hits = raycaster.intersectObject(artistTrackPoints);
+    if (hits.length > 0 && artistTrackData[hits[0].index]) {
+      openTrackOnPlatform(artistTrackData[hits[0].index]);
+    }
   }
 });
+
+// ── OUVRIR UN MORCEAU SUR LA PLATEFORME D'IMPORT ──
+// On n'a pas d'ID de morceau (le CSV importé ne contient que nom/album/année),
+// donc on ouvre une recherche sur la plateforme choisie lors de l'import.
+// C'est le meilleur lien possible sans réécrire tout le pipeline d'import
+// pour récupérer les vrais IDs de morceaux via l'API de chaque service.
+function buildPlatformSearchUrl(service, artist, track) {
+  const q = encodeURIComponent(track);
+  switch (service) {
+    case 'spotify':    return `https://open.spotify.com/search/${q}`;
+    case 'apple':      return `https://music.apple.com/search?term=${q}`;
+    case 'deezer':     return `https://www.deezer.com/search/${q}`;
+    case 'soundcloud': return `https://soundcloud.com/search?q=${q}`;
+    default:           return `https://open.spotify.com/search/${q}`; // fallback
+  }
+}
+
+function openTrackOnPlatform(trackData) {
+  const service = (typeof MUSIC_SERVICE !== 'undefined' && MUSIC_SERVICE) || null;
+  const url = buildPlatformSearchUrl(service, trackData.artist, trackData.track);
+  window.open(url, '_blank', 'noopener');
+}
 
 canvas.addEventListener('wheel', e => {
   const min = mode === 'artist' ? 14 : 55;

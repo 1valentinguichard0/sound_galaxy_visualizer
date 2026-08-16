@@ -375,6 +375,18 @@ async function loadPublicProfile(username) {
   document.getElementById('share-section-label').style.display = 'none';
   document.getElementById('import-section-label').style.display = 'none';
 
+  // Session du visiteur — nécessaire pour connaître SA plateforme (pas celle de l'ami)
+  const { data: { session } } = await _sb.auth.getSession();
+  let myService = null;
+  if (session?.user?.id) {
+    const { data: myGalaxy } = await _sb
+      .from('galaxies')
+      .select('service')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+    myService = myGalaxy?.service || null;
+  }
+
   // Galaxie publique
   const { data: galaxyRow } = await _sb
     .from('galaxies')
@@ -391,7 +403,9 @@ async function loadPublicProfile(username) {
     document.getElementById('galaxy-updated').textContent = '// Mise à jour le ' + updated;
 
     document.getElementById('btn-launch-galaxy').addEventListener('click', () => {
-      launchGalaxy(galaxyRow.data, galaxyRow.service);
+      // On affiche les données (musique) de l'ami, mais on ouvre les morceaux
+      // sur MA plateforme à moi, pas la sienne.
+      launchGalaxy(galaxyRow.data, myService || galaxyRow.service);
     });
 
     document.getElementById('galaxy-empty').style.display  = 'none';
@@ -400,8 +414,6 @@ async function loadPublicProfile(username) {
     document.getElementById('galaxy-empty').textContent = '// Cette galaxie est privée ou n\'existe pas encore';
   }
 
-  // Follow
-  const { data: { session } } = await _sb.auth.getSession();
   _profileUserId = profile.id;
   await loadFollowData(profile.id, session?.user?.id, false);
 
